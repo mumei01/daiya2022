@@ -80,7 +80,7 @@ public class SignClick implements Listener {
             int secondsCoolDownCeil = (int) Math.ceil(secondsCoolDown);
 
             // 通知
-            player.sendTitle("§c§l§nクールタイム中", "§f§lあと" + "§6§l" + secondsCoolDownCeil + "秒間§f§l待ってください", 0, 20, 20);
+            player.sendTitle("§c§l§nクールダウン中", "§f§lあと" + "§6§l" + secondsCoolDownCeil + "秒間§f§l待ってください", 0, 20, 20);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0F, 0.0F);
 
         } else { // ない場合
