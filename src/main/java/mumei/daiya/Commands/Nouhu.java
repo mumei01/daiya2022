@@ -31,7 +31,7 @@ public class Nouhu implements CommandExecutor {
 
 
 
-        if (inv.contains((Material.DIAMOND)) && (int)config.getConfiguration().get("sum_point")<= 2022 ){
+        if (inv.contains((Material.DIAMOND)) && (int)config.getConfiguration().get("sum_point")<= 2022 && sender.hasPermission("op")){
             String a = inv.all(Material.DIAMOND).toString();
             String[] b = a.split(",");
 
