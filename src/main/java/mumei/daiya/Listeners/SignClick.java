@@ -8,23 +8,23 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 看板クリックにクールタイムを付与するリスナー
- * * @author HIYU1576
+ * @author HIYU1576
+ * @description CoolTimeSeconds 変数を編集することで、クールタイム時間を変更できます
+ * @attention 正常動作を行うためには、看板の2行目に必ず「納付」という文字を含めてください。
  */
 public class SignClick implements Listener {
 
     /**
-     * プラグインインスタンス
+     * インスタンス生成
      */
     private Plugin Plugin;
 
@@ -36,14 +36,13 @@ public class SignClick implements Listener {
     /**
      * クールタイム時間の設定
      */
-    private Integer CoolTimeSeconds = 60; // クールタイム時間(秒)
-    private Long CoolTimeMilliSeconds =  CoolTimeSeconds * new Long(1000).longValue(); // クールタイム時間(ミリ秒)
+    Integer CoolTimeSeconds = 60; // クールタイム時間(秒)
 
     /**
      * その他変数
      */
-    private ArrayList<Player> PreventDoubleClick = new ArrayList<>(); // ダブルクリック防止用
-    private HashMap<Player, Date> CoolTime = new HashMap(); // クールタイム時間保持用
+    private Long CoolTimeMilliSeconds =  CoolTimeSeconds * new Long(1000).longValue(); // クールタイム時間(ミリ秒)
+    private HashMap<Player, Long> CoolTime = new HashMap(); // クールタイム時間保持用
 
     /**
      * 看板イベントクリック
@@ -52,66 +51,47 @@ public class SignClick implements Listener {
     public void onSignClick(PlayerInteractEvent Event) {
         Player player = Event.getPlayer();
         Block clickedBlock = Event.getClickedBlock();
+        Action action = Event.getAction();
+
+        // 右クリックのみ
+        if (action != Action.RIGHT_CLICK_BLOCK) { return; }
+
+        // 看板のみ
         if (clickedBlock == null || !clickedBlock.getType().name().contains("SIGN")) return;
 
         // 納付看板のみ
         Sign signBlock = (Sign) clickedBlock.getState();
         if (!signBlock.getLine(1).contains("納付")) { return; }
 
-        // ダブルクリック防止
-        if (!PreventDoubleClick.contains(player)) {
 
-            PreventDoubleClick.add(player);
-            new BukkitRunnable() {
+        // 差分取得
+        long nowTime = new Date().getTime();
+        long prevTime = CoolTime.getOrDefault(player, nowTime);
+        long diffTime = nowTime - prevTime;
 
-                @Override public void run() {
+        // クールタイムの状況
+        boolean isCoolDown = diffTime != 0 && diffTime <= CoolTimeMilliSeconds;
 
-                    try {
-                        Thread.sleep(100L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    PreventDoubleClick.remove(player);
-                }
-            }.runTaskAsynchronously(Plugin);
-
-        } else { return; }
-
-
-        // Dateインスタンス
-        Date nowDate = new Date();
-        Date timeDate = CoolTime.get(player);
-
-        // 残り時間
-        Long leftTime = nowDate.getTime() - timeDate.getTime();
-        Boolean isOutDate = leftTime <= CoolTimeMilliSeconds;
-
-        Bukkit.broadcastMessage("今DATE " + String.valueOf(nowDate.getTime()));
-        Bukkit.broadcastMessage("昔DATE " + String.valueOf(timeDate.getTime()));
-
-        Bukkit.broadcastMessage("[DEBUG] LONG TIME " + String.valueOf(leftTime));
-        Bukkit.broadcastMessage("isOutDate : "+isOutDate.toString());
         // クールタイムがある場合
-        if (!isOutDate) { Event.setCancelled(true);
-
-            Bukkit.broadcastMessage("クールタイムある");
+        if (isCoolDown) { Event.setCancelled(true);
 
             // ミリ秒を秒へ変換
-            double secondsCoolDown = leftTime.doubleValue() / 1000.0;
+            double secondsCoolDown = (CoolTimeMilliSeconds - diffTime) / 1000.0;
+            int secondsCoolDownCeil = (int) Math.ceil(secondsCoolDown);
 
             // 通知
-            player.sendTitle("§c§l§nクールタイム中", "§f§lあと" + "§6§l" + Math.floor(secondsCoolDown) + "秒§f§l間待ってください", 0, 20, 20);
+            player.sendTitle("§c§l§nクールタイム中", "§f§lあと" + "§6§l" + secondsCoolDownCeil + "秒間§f§l待ってください", 0, 20, 20);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0F, 0.0F);
 
         } else { // ない場合
-            Bukkit.broadcastMessage("クールタイムない");
+
+            // 期間算出
+            long periodTime = nowTime + CoolTimeSeconds;
+
             // クールタイム付与
-            Date periodDate = new Date(timeDate.getTime() + CoolTimeSeconds);
-            CoolTime.replace(player, periodDate);
+            CoolTime.remove(player);
+            CoolTime.put(player, periodTime);
         }
-
-
     }
 
 }
