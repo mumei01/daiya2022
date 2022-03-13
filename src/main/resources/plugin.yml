@@ -1,0 +1,12 @@
+name: Daiya
+version: '${project.version}'
+main: mumei.daiya.Daiya
+api-version: 1.18
+
+commands:
+  nouhu:
+    description: nouhu suruyo
+    usage: /nouhu
+  da:
+    description: 最初の設定
+    usage: /da
