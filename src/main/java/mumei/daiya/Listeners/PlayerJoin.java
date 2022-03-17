@@ -18,6 +18,6 @@ public class PlayerJoin implements Listener {
         Player player = p.getPlayer();
         p.setJoinMessage(ChatColor.GREEN+player.getDisplayName()+ChatColor.WHITE+"さんが参加しました。");
         plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                "bossbar set minecraft:scores players "+player.getDisplayName());
+                "bossbar set minecraft:scores players @a");
     }
 }
