@@ -41,6 +41,7 @@ public class SignClick implements Listener {
      */
     private Long CoolTimeMilliSeconds =  CoolTimeSeconds * new Long(1000).longValue(); // クールタイム時間(ミリ秒)
     private HashMap<Player, Long> CoolTime = new HashMap(); // クールタイム時間保持用
+    private HashSet<Player> PreventDoubleClick = new HashSet<Player>();
 
     /**
      * 看板イベントクリック
@@ -50,6 +51,15 @@ public class SignClick implements Listener {
         Player player = Event.getPlayer();
         Block clickedBlock = Event.getClickedBlock();
         Action action = Event.getAction();
+
+        if (!PreventDoubleClick.contains(player)) {
+            PreventDoubleClick.add(player);
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Plugin, new Runnable() {
+                @Override public void run() {
+                    PreventDoubleClick.remove(player);
+                }
+            }, 20L);
+        } else { return; }
 
         // 右クリックのみ
         if (action != Action.RIGHT_CLICK_BLOCK) { return; }
@@ -82,6 +92,8 @@ public class SignClick implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0F, 0.0F);
 
         } else { // ない場合
+
+            Bukkit.dispatchCommand(player, "nouhu");
 
             // 期間算出
             long periodTime = nowTime + CoolTimeSeconds;
