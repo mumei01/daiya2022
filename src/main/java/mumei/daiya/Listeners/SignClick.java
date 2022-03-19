@@ -1,6 +1,10 @@
 package mumei.daiya.Listeners;
 
+import mumei.daiya.Daiya;
+import mumei.daiya.utils.CustomConfig;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -9,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
@@ -89,7 +94,43 @@ public class SignClick implements Listener {
             // クールタイム付与
             CoolTime.remove(player);
             CoolTime.put(player, periodTime);
+
+
+
+            //ダイヤモンド系の処理
+            Inventory inv = player.getInventory();
+
+            CustomConfig config = Daiya.getCustomConfig();
+
+            if (inv.contains((Material.DIAMOND)) && (int)config.getConfiguration().get("sum_point")<= 2022 ){
+                String a = inv.all(Material.DIAMOND).toString();
+                String[] b = a.split(",");
+
+                int sum = 0;
+
+
+                for (int i = 0;i < b.length;i++){
+                    String c;
+                    if (i == 0){
+                        c = b[i].split(" ")[2];
+                    }else {
+                        c = b[i].split(" ")[3];
+                    }
+
+                    int d = Integer.parseInt(c.split("}")[0]);
+                    sum +=d;
+                }
+
+                Daiya.sidebar.addpoint(player, sum);
+            }else{
+                player.sendMessage(ChatColor.AQUA + "インベントリにダイヤがありません。");
+            }
+
         }
+
+
+
+
     }
 
 }

@@ -33,7 +33,7 @@ class TestRunnable extends BukkitRunnable {
     /**
      * タスク処理内容
      */
-    Color[] colors = {Color.BLUE,Color.RED,Color.AQUA,Color.YELLOW,Color.GREEN};
+    Color[] colors = {Color.BLUE,Color.RED,Color.AQUA,Color.YELLOW,Color.GREEN,Color.WHITE,Color.FUCHSIA,Color.GRAY,Color.LIME,Color.MAROON,Color.NAVY,Color.OLIVE,Color.ORANGE,Color.PURPLE};
     public static Boolean check = false;
     public void run() {
         int x = (int) (lc.getX()+r.nextInt(15));
@@ -44,7 +44,7 @@ class TestRunnable extends BukkitRunnable {
         Firework firework = loc.getWorld().spawn(loc, Firework.class);
         FireworkMeta meta=firework.getFireworkMeta();
         FireworkEffect.Builder effect=FireworkEffect.builder();
-        effect.withColor(colors[r.nextInt(4)]);
+        effect.withColor(colors[r.nextInt(colors.length)]);
         meta.addEffect(effect.build());
         meta.setPower(1);
         firework.setFireworkMeta(meta);
